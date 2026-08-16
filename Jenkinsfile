@@ -29,7 +29,6 @@ pipeline {
             }
         }
         
- 
 stage('SonarQube Analysis') {
     steps {
         withSonarQubeEnv('SonarQube') {
@@ -42,7 +41,7 @@ stage('SonarQube Analysis') {
 
 stage('Docker Build') {
     steps {
-        sh 'docker build -t ScratchSpringBootProject-2-app:latest .'
+        sh  'docker build -t scratchspringbootproject-2-app:latest .'
         echo ' Docker Build  stage successful!'
     }
 }
