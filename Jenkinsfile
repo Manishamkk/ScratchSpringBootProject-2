@@ -33,7 +33,7 @@ pipeline {
 stage('SonarQube Analysis') {
     steps {
         withSonarQubeEnv('SonarQube') {
-            sh 'mvn clean verify sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.login=sqp_7f11927166a5007e79c717e6ea74248838b16a3f'
+            sh 'mvn clean verify sonar:sonar -Dsonar.host.url=http://host.docker.internal:9000'
         }
     }
 }
