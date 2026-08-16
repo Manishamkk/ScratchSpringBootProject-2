@@ -51,11 +51,7 @@ stage('Docker Run') {
         sh '''
             docker stop scratchspringbootproject-2-app || true
             docker rm scratchspringbootproject-2-app || true
-
-            docker run -d 
-                -p 8084:8084 
-                --name scratchspringbootproject-2-app 
-                scratchspringbootproject-2-app:latest
+            docker run -d -p 8084:8084 --name scratchspringbootproject-2-app scratchspringbootproject-2-app:latest
         '''
     }
 }
