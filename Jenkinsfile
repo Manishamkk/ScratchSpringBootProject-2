@@ -70,6 +70,8 @@ pipeline {
 
                 script {
 
+                    echo "Creating Git tag: ${VERSION}"
+
                     withCredentials([
                         usernamePassword(
                             credentialsId: 'github-credentials',
@@ -79,21 +81,26 @@ pipeline {
                     ]) {
 
                         sh '''
-                            echo "Creating Git tag: ${VERSION}"
-
                             git config user.name "Jenkins"
                             git config user.email "jenkins@example.com"
 
-                            git tag -a "${VERSION}" -m "Release ${VERSION}"
+                            echo "Creating tag ${VERSION}"
 
-                            git push https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/Manishamkk/ScratchSpringBootProject-2.git "${VERSION}"
+                            git tag -a "${VERSION}" \
+                                -m "Release ${VERSION}"
+
+                            echo "Pushing tag ${VERSION} to GitHub"
+
+                            git push \
+                                https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/Manishamkk/ScratchSpringBootProject-2.git \
+                                "${VERSION}"
 
                             echo "Git tag ${VERSION} pushed successfully!"
                         '''
                     }
-                }
 
-                echo "GitHub Release Tag Created: ${VERSION}"
+                    echo "GitHub Release Tag Created: ${VERSION}"
+                }
             }
         }
 
@@ -147,7 +154,6 @@ pipeline {
                 '''
             }
         }
-
     }
 
     post {
@@ -162,6 +168,7 @@ pipeline {
             echo "Docker Image        : ${env.APP_NAME}:${env.VERSION}"
             echo "Docker Latest       : ${env.APP_NAME}:latest"
             echo "GitHub Tag          : ${env.VERSION}"
+
             echo "=========================================="
         }
 
@@ -172,6 +179,8 @@ pipeline {
             echo "=========================================="
 
             echo "Please check the Jenkins console log."
+
+            echo "=========================================="
         }
     }
 }
