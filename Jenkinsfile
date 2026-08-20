@@ -6,9 +6,9 @@ pipeline {
         maven 'maven'
     }
 
-    environment {
-        APP_NAME = 'scratchspringbootproject-2-app'
-        DOCKER_PORT = '8084'
+   environment {
+        GIT_TAG = "v1.0.${BUILD_NUMBER}"
+        IMAGE_NAME = "spring-second-project"
     }
 
     stages {
