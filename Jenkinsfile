@@ -8,7 +8,7 @@ pipeline {
 
    environment {
         GIT_TAG = "v1.0.${BUILD_NUMBER}"
-        IMAGE_NAME = "spring-second-project"
+        IMAGE_NAME = "ScratchSpringBootProject-2"
     }
 
     stages {
@@ -65,42 +65,30 @@ pipeline {
             }
         }
 
-        stage('Git Tag') {
+         stage('Git Tag') {
             steps {
 
-                script {
+                echo "Creating Git Tag: ${GIT_TAG}"
 
-                    echo "Creating Git tag: ${VERSION}"
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'github-token',
+                        usernameVariable: 'GIT_USERNAME',
+                        passwordVariable: 'GIT_PASSWORD'
+                    )
+                ]) {
 
-                    withCredentials([
-                        usernamePassword(
-                            credentialsId: 'github-credentials',
-                            usernameVariable: 'GIT_USERNAME',
-                            passwordVariable: 'GIT_TOKEN'
-                        )
-                    ]) {
+                    sh '''
+                        git config user.name "Manisha Kadam"
+                        git config user.email "your-email@gmail.com"
 
-                        sh '''
-                            git config user.name "Jenkins"
-                            git config user.email "jenkins@example.com"
+                        git tag -a "${GIT_TAG}" -m "Release ${GIT_TAG}"
 
-                            echo "Creating tag ${VERSION}"
-
-                            git tag -a "${VERSION}" \
-                                -m "Release ${VERSION}"
-
-                            echo "Pushing tag ${VERSION} to GitHub"
-
-                            git push \
-                                https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/Manishamkk/ScratchSpringBootProject-2.git \
-                                "${VERSION}"
-
-                            echo "Git tag ${VERSION} pushed successfully!"
-                        '''
-                    }
-
-                    echo "GitHub Release Tag Created: ${VERSION}"
+                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/Manishamkk/ScratchSpringBootProject-2.git "${GIT_TAG}"
+                    '''
                 }
+
+                echo "Git Tag ${GIT_TAG} created and pushed successfully!"
             }
         }
 
