@@ -6,12 +6,26 @@ pipeline {
         maven 'maven'
     }
 
+    environment {
+        APP_NAME = 'scratchspringbootproject-2-app'
+        DOCKER_PORT = '8084'
+    }
+
     stages {
 
         stage('Checkout') {
             steps {
                 git branch: 'main',
                     url: 'https://github.com/Manishamkk/ScratchSpringBootProject-2.git'
+            }
+        }
+
+        stage('Set Version') {
+            steps {
+                script {
+                    env.VERSION = "v1.0.${env.BUILD_NUMBER}"
+                    echo "Application Version: ${env.VERSION}"
+                }
             }
         }
 
@@ -42,35 +56,40 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                echo 'Building Docker image...'
+                echo "Building Docker image with version: ${env.VERSION}"
 
-                sh '''
-                    docker build -t scratchspringbootproject-2-app:latest .
-                '''
+                sh """
+                    docker build \
+                    -t ${APP_NAME}:${VERSION} \
+                    -t ${APP_NAME}:latest \
+                    .
+                """
 
-                echo 'Docker Build stage successful!'
+                echo "Docker images created:"
+                echo "${APP_NAME}:${VERSION}"
+                echo "${APP_NAME}:latest"
             }
         }
 
         stage('Docker Run') {
             steps {
-                sh '''
-                    docker stop scratchspringbootproject-2-app || true
-                    docker rm scratchspringbootproject-2-app || true
+                sh """
+                    docker stop ${APP_NAME} || true
+                    docker rm ${APP_NAME} || true
 
                     docker run -d \
-                    -p 8084:8084 \
-                    --name scratchspringbootproject-2-app \
-                    scratchspringbootproject-2-app:latest
-                '''
+                    -p ${DOCKER_PORT}:${DOCKER_PORT} \
+                    --name ${APP_NAME} \
+                    ${APP_NAME}:${VERSION}
+                """
+
+                echo "Docker container started using image: ${APP_NAME}:${VERSION}"
             }
         }
 
         stage('Git Tag') {
             steps {
                 script {
-
-                    def tagName = "v1.0.${env.BUILD_NUMBER}"
 
                     withCredentials([usernamePassword(
                         credentialsId: 'github-credentials',
@@ -82,13 +101,13 @@ pipeline {
                             git config user.name "Jenkins"
                             git config user.email "jenkins@example.com"
 
-                            git tag -a ${tagName} -m "Release ${tagName}"
+                            git tag -a ${VERSION} -m "Release ${VERSION}"
 
-                            git push https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/Manishamkk/ScratchSpringBootProject-2.git ${tagName}
+                            git push https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/Manishamkk/ScratchSpringBootProject-2.git ${VERSION}
                         """
                     }
 
-                    echo "Git Release Tag Created: ${tagName}"
+                    echo "Git Release Tag Created: ${VERSION}"
                 }
             }
         }
@@ -97,7 +116,8 @@ pipeline {
     post {
 
         success {
-            echo 'Build, Docker deployment and Git tagging successful!'
+            echo 'Build, Test, SonarQube, Docker deployment and Git tagging successful!'
+            echo "Release Version: ${env.VERSION}"
         }
 
         failure {
